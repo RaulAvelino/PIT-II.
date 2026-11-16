@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Avelino's Cupcake Store{% endblock %}</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome para Ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- CSS Customizado -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fa-solid fa-cookie-bite me-2"></i>Avelino's Cupcake
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link fw-semibold active" href="/">Início</a></li>
+                    <li class="nav-item"><a class="nav-link fw-semibold" href="#catalogo">Catálogo</a></li>
+                    <li class="nav-item ms-lg-3">
+                        <!-- Botão que abre a gaveta do carrinho -->
+                        <button class="btn btn-outline-danger position-relative rounded-pill px-3" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCarrinho">
+                            <i class="fa-solid fa-cart-shopping me-1"></i> Carrinho
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cart-count">0</span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    {% block content %}{% endblock %}
+
+    <!-- GAVETA LATERAL DO CARRINHO (Offcanvas) -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasCarrinho" aria-labelledby="offcanvasCarrinhoLabel">
+        <div class="offcanvas-header border-bottom">
+            <h5 class="offcanvas-title fw-bold text-danger" id="offcanvasCarrinhoLabel">
+                <i class="fa-solid fa-cart-shopping me-2"></i>Seu Carrinho
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body d-flex flex-column">
+            <!-- Lista de Itens do Carrinho -->
+            <ul class="list-group list-group-flush flex-grow-1" id="lista-carrinho">
+                <li class="list-group-item text-center text-muted py-4" id="carrinho-vazio">
+                    Seu carrinho está vazio no momento.
+                </li>
+            </ul>
+
+            <!-- Rodapé do Carrinho -->
+            <div class="border-top pt-3 mt-auto">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="fw-bold fs-5">Total:</span>
+                    <span class="fw-bold fs-5 text-danger" id="total-carrinho">R$ 0,00</span>
+                </div>
+                <button class="btn btn-danger w-100 rounded-pill py-2 fw-bold" onclick="finalizarPedido()">
+                    Finalizar Pedido
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white text-center text-muted py-4 mt-5 border-top">
+        <div class="container">
+            <p class="mb-0">© 2026 Avelino's Cupcake Store. Desenvolvido para o Projeto Integrador (PIT II).</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Script do Carrinho Dinâmico -->
+    <script>
+        let carrinho = [];
+
+        function adicionarAoCarrinho(nome, preco) {
+            carrinho.push({ nome: nome, preco: preco });
+            atualizarCarrinhoUI();
+            
+            // Abre a gaveta do carrinho automaticamente
+            let offcanvasElement = document.getElementById('offcanvasCarrinho');
+            let bsOffcanvas = bootstrap.Offcanvas.getInstance(offcanvasElement) || new bootstrap.Offcanvas(offcanvasElement);
+            bsOffcanvas.show();
+        }
+
+        function atualizarCarrinhoUI() {
+            const lista = document.getElementById('lista-carrinho');
+            const totalElement = document.getElementById('total-carrinho');
+            const countElement = document.getElementById('cart-count');
+
+            countElement.innerText = carrinho.length;
+
+            if (carrinho.length === 0) {
+                lista.innerHTML = '<li class="list-group-item text-center text-muted py-4">Seu carrinho está vazio.</li>';
+                totalElement.innerText = 'R$ 0,00';
+                return;
+            }
+
+            lista.innerHTML = '';
+            let total = 0;
+
+            carrinho.forEach((item, index) => {
+                total += item.preco;
+                lista.innerHTML += `
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <div>
+                            <h6 class="mb-0 fw-bold">${item.nome}</h6>
+                            <small class="text-muted">R$ ${item.preco.toFixed(2).replace('.', ',')}</small>
+                        </div>
+                        <button class="btn btn-sm btn-outline-danger border-0" onclick="removerDoCarrinho(${index})">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </li>
+                `;
+            });
+
+            totalElement.innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
+        }
+
+        function removerDoCarrinho(index) {
+            carrinho.splice(index, 1);
+            atualizarCarrinhoUI();
+        }
+
+        function finalizarPedido() {
+            if (carrinho.length === 0) {
+                alert('Seu carrinho está vazio!');
+                return;
+            }
+            alert('🎉 Pedido realizado com sucesso! Obrigado por comprar na Avelino\'s Cupcake Store.');
+            carrinho = [];
+            atualizarCarrinhoUI();
+            let offcanvasElement = document.getElementById('offcanvasCarrinho');
+            let bsOffcanvas = bootstrap.Offcanvas.getInstance(offcanvasElement);
+            if (bsOffcanvas) bsOffcanvas.hide();
+        }
+    </script>
+</body>
+</html>
