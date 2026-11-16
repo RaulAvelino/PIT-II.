@@ -21,7 +21,7 @@ O projeto atende aos requisitos práticos e teóricos das 3 Situações-Problema
 * **Front-end:** HTML5, CSS3, JavaScript (ES6+), Bootstrap 5, FontAwesome
 * **Arquitetura:** MVC (Model-View-Controller)
 * **Banco de Dados (Previsto):** SQLite / PostgreSQL
-* **Hospedagem (Planejada):** Render
+* **Hospedagem (Planejada):** Render / Localhost
 * **Testes Unitários:** Pytest
 * **Controle de Versão:** Git / GitHub
 
